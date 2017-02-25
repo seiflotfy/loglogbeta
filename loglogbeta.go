@@ -31,13 +31,12 @@ func beta(ez, zl float64) float64 {
 }
 
 // Calculate the position of the leftmost 1-bit.
-func rho(val uint64, max uint8) uint8 {
-	r := uint8(1)
-	for val&0x80000000 == 0 && r <= max {
+func rho(val uint64, max uint8) (r uint8) {
+	for val&0x8000000000000000 == 0 && r <= max {
 		val <<= 1
 		r++
 	}
-	return r
+	return r + 1
 }
 
 func alpha(m float64) float64 {
@@ -52,33 +51,39 @@ func alpha(m float64) float64 {
 	return 0.7213 / (1 + 1.079/m)
 }
 
-// LogLogBeta ...
+// LogLogBeta is a sketch for cardinality estimation based on LogLog counting
 type LogLogBeta struct {
 	registers []uint8
 	m         uint32
-	bits      uint8
+	precision uint8
 	alpha     float64
 }
 
-// New ...
-func New(precision uint32) (*LogLogBeta, error) {
+// New returns a LogLogBeta sketch with 2^precision registers, where
+// precision must be between 4 and 16
+func New(precision uint8) (*LogLogBeta, error) {
 	if precision > 16 || precision < 4 {
 		return nil, errors.New("precision must be between 4 and 16")
 	}
 	m := uint32(1 << precision)
 	return &LogLogBeta{
 		m:         m,
-		bits:      uint8(math.Ceil(math.Log2(float64(m)))),
+		precision: precision,
 		registers: make([]uint8, m),
 		alpha:     alpha(float64(m)),
 	}, nil
 }
 
-// Add ...
+// NewDefault returns a LogLogBeta sketch with 2^14 registers
+func NewDefault(precision uint8) (*LogLogBeta, error) {
+	return New(14)
+}
+
+// Add inserts a value into the sketch
 func (llb *LogLogBeta) Add(value []byte) {
 	x := metro.Hash64(value, 1337)
-	max := 64 - llb.bits
-	val := rho(x<<llb.bits, max)
+	max := 64 - llb.precision
+	val := rho(x<<llb.precision, max)
 	k := x >> uint(max)
 
 	if llb.registers[k] < val {
@@ -86,11 +91,7 @@ func (llb *LogLogBeta) Add(value []byte) {
 	}
 }
 
-func linearCounting(m float64, v float64) float64 {
-	return m * math.Log(m/float64(v))
-}
-
-// Cardinality ...
+// Cardinality returns the number of unique elements added to the sketch
 func (llb *LogLogBeta) Cardinality() uint64 {
 	sum := 0.0
 	m := float64(llb.m)
@@ -101,7 +102,20 @@ func (llb *LogLogBeta) Cardinality() uint64 {
 	ez := zeros(llb.registers)
 	zl := math.Log(ez + 1)
 	beta := beta(ez, zl)
-	est := llb.alpha * m * (m - ez) / (beta + sum)
+	return uint64(llb.alpha * m * (m - ez) / (beta + sum))
+}
 
-	return uint64(est)
+// Merge takes another LogLogBeta and combines it with llb one, making llb the union of both.
+func (llb *LogLogBeta) Merge(other *LogLogBeta) error {
+	if llb.precision != llb.precision {
+		return errors.New("precisions must be equal")
+	}
+
+	for i, v := range llb.registers {
+		if v < other.registers[i] {
+			llb.registers[i] = other.registers[i]
+		}
+	}
+
+	return nil
 }
