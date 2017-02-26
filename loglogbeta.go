@@ -19,7 +19,8 @@ func zeros(registers []uint8) float64 {
 	return z
 }
 
-func beta(ez, zl float64) float64 {
+func beta(ez float64) float64 {
+	zl := math.Log(ez + 1)
 	return -0.370393911*ez +
 		0.070471823*zl +
 		0.17393686*math.Pow(zl, 2) +
@@ -100,8 +101,7 @@ func (llb *LogLogBeta) Cardinality() uint64 {
 	}
 
 	ez := zeros(llb.registers)
-	zl := math.Log(ez + 1)
-	beta := beta(ez, zl)
+	beta := beta(ez)
 	return uint64(llb.alpha * m * (m - ez) / (beta + sum))
 }
 
