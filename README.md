@@ -2,6 +2,9 @@
 [LogLog-Beta and More: A New Algorithm for Cardinality Estimation Based on LogLog Counting](https://arxiv.org/pdf/1612.02284.pdf) -
 by Jason Qin, Denys Kim, Yumei Tung
 
+**TL;DR:**
+Better than HyperLogLog in approximating the number unique elements in a set
+
 ## Using
 ```go
 
