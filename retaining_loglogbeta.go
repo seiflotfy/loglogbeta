@@ -60,11 +60,17 @@ func (rllb *RLogLogBeta) Add(value []byte, timestamp time.Time) {
 	}
 }
 
-// Cardinality returns the number of unique elements added to the sketch since a specific timestamp
-func (rllb *RLogLogBeta) Cardinality(since time.Time) uint64 {
+// CardinalitySince returns the number of unique elements added to the sketch since a specific timestamp
+func (rllb *RLogLogBeta) CardinalitySince(since time.Time) uint64 {
 	m := float64(rllb.m)
 	sum := regSumSince(rllb.registers, since)
 	ez := zerosSince(rllb.registers, since.Unix())
 	beta := beta(ez)
 	return uint64(rllb.alpha * m * (m - ez) / (beta + sum))
+}
+
+// Cardinality returns the number of unique elements added to the sketch since the beginning of time
+func (rllb *RLogLogBeta) Cardinality() uint64 {
+	// FIXME: need to start with +1 seconds which is weird
+	return rllb.CardinalitySince(time.Unix(1, 0))
 }

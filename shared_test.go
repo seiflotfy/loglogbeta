@@ -41,4 +41,9 @@ func TestZerosSince(t *testing.T) {
 	if got != exp {
 		t.Errorf("expected %.2f, got %.2f", exp, got)
 	}
+	got = zerosSince(registers, 0)
+	exp = 0.0
+	if got != exp {
+		t.Errorf("expected %.2f, got %.2f", exp, got)
+	}
 }

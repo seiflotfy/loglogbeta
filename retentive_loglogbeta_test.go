@@ -8,7 +8,7 @@ import (
 	"time"
 )
 
-func TestRetainingCardinality(t *testing.T) {
+func TestRetainingCardinalitySince(t *testing.T) {
 	rllb, err := NewRetaining(14)
 	if err != nil {
 		t.Error("expected no error, got", err)
@@ -30,7 +30,7 @@ func TestRetainingCardinality(t *testing.T) {
 			now := time.Now()
 			since = append(since, now)
 			exact := len(tmpUnique)
-			res := int(rllb.Cardinality(now))
+			res := int(rllb.CardinalitySince(now))
 			ratio := 100 * math.Abs(float64(res-exact)) / float64(exact)
 			expectedError := 1.04 / math.Sqrt(float64(rllb.m))
 
@@ -39,7 +39,7 @@ func TestRetainingCardinality(t *testing.T) {
 			}
 
 			exact = len(unique)
-			res = int(rllb.Cardinality(since[0]))
+			res = int(rllb.CardinalitySince(since[0]))
 			ratio = 100 * math.Abs(float64(res-exact)) / float64(exact)
 			expectedError = 1.04 / math.Sqrt(float64(rllb.m))
 
@@ -53,7 +53,7 @@ func TestRetainingCardinality(t *testing.T) {
 	}
 }
 
-func TestRetainingHyperLogLog(t *testing.T) {
+func TestRetainingLogLogBetaManual(t *testing.T) {
 	rllb, err := NewRetaining(14)
 	if err != nil {
 		t.Error("expected no error, got", err)
@@ -65,7 +65,7 @@ func TestRetainingHyperLogLog(t *testing.T) {
 
 	timestamp1 := time.Now()
 	exact := 1000
-	res := int(rllb.Cardinality(timestamp1))
+	res := int(rllb.CardinalitySince(timestamp1))
 	ratio := 100 * math.Abs(float64(res-exact)) / float64(exact)
 	expectedError := 1.04 / math.Sqrt(float64(rllb.m))
 
@@ -81,7 +81,7 @@ func TestRetainingHyperLogLog(t *testing.T) {
 
 	timestamp2 := time.Now()
 	exact = 1000
-	res = int(rllb.Cardinality(timestamp2))
+	res = int(rllb.CardinalitySince(timestamp2))
 	ratio = 100 * math.Abs(float64(res-exact)) / float64(exact)
 	expectedError = 1.04 / math.Sqrt(float64(rllb.m))
 
@@ -90,7 +90,7 @@ func TestRetainingHyperLogLog(t *testing.T) {
 	}
 
 	exact = 2000
-	res = int(rllb.Cardinality(timestamp1))
+	res = int(rllb.CardinalitySince(timestamp1))
 	ratio = 100 * math.Abs(float64(res-exact)) / float64(exact)
 	expectedError = 1.04 / math.Sqrt(float64(rllb.m))
 
@@ -106,7 +106,7 @@ func TestRetainingHyperLogLog(t *testing.T) {
 
 	timestamp3 := time.Now()
 	exact = 1000
-	res = int(rllb.Cardinality(timestamp3))
+	res = int(rllb.CardinalitySince(timestamp3))
 	ratio = 100 * math.Abs(float64(res-exact)) / float64(exact)
 	expectedError = 1.04 / math.Sqrt(float64(rllb.m))
 
@@ -115,7 +115,7 @@ func TestRetainingHyperLogLog(t *testing.T) {
 	}
 
 	exact = 2000
-	res = int(rllb.Cardinality(timestamp2))
+	res = int(rllb.CardinalitySince(timestamp2))
 	ratio = 100 * math.Abs(float64(res-exact)) / float64(exact)
 	expectedError = 1.04 / math.Sqrt(float64(rllb.m))
 
@@ -124,7 +124,7 @@ func TestRetainingHyperLogLog(t *testing.T) {
 	}
 
 	exact = 3000
-	res = int(rllb.Cardinality(timestamp1))
+	res = int(rllb.CardinalitySince(timestamp1))
 	ratio = 100 * math.Abs(float64(res-exact)) / float64(exact)
 	expectedError = 1.04 / math.Sqrt(float64(rllb.m))
 
@@ -136,7 +136,16 @@ func TestRetainingHyperLogLog(t *testing.T) {
 	timestamp4 := time.Now()
 
 	exact = 0
-	res = int(rllb.Cardinality(timestamp4))
+	res = int(rllb.CardinalitySince(timestamp4))
+	ratio = 100 * math.Abs(float64(res-exact)) / float64(exact)
+	expectedError = 1.04 / math.Sqrt(float64(rllb.m))
+
+	if float64(res) < float64(exact)-(float64(exact)*expectedError) || float64(res) > float64(exact)+(float64(exact)*expectedError) {
+		t.Errorf("Exact %d, got %d which is %.2f%% error", exact, res, ratio)
+	}
+
+	exact = 3000
+	res = int(rllb.Cardinality())
 	ratio = 100 * math.Abs(float64(res-exact)) / float64(exact)
 	expectedError = 1.04 / math.Sqrt(float64(rllb.m))
 
