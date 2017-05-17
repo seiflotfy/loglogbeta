@@ -1,11 +1,10 @@
 package loglogbeta
 
 import (
+	"math"
 	"math/rand"
 	"testing"
 	"time"
-
-	"math"
 )
 
 const letterBytes = "abcdefghijklmnopqrstuvwxyzABCDEFGHIJKLMNOPQRSTUVWXYZ"
@@ -29,7 +28,7 @@ func TestCardinality(t *testing.T) {
 	step := 10000
 	unique := map[string]bool{}
 
-	for i := 1; len(unique) <= 10000000; i++ {
+	for i := 1; len(unique) <= 1000000; i++ {
 		str := RandStringBytesMaskImprSrc(rand.Uint32() % 32)
 		llb.Add([]byte(str))
 		unique[str] = true
