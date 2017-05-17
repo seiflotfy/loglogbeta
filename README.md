@@ -47,7 +47,7 @@ rllb.Add([]byte["world"], pastTime)
 rllb.CardinalitySince(pastTime)
 
 // Returns overall cardinality
-rllb.CardinalitySince(pastTime)
+rllb.Cardinality()
 ```
 
 
