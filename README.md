@@ -1,4 +1,4 @@
-# LogLog-Beta
+# LogLog-Beta [![GoDoc](https://godoc.org/github.com/seiflotfy/loglogbeta?status.svg)](https://godoc.org/github.com/seiflotfy/loglogbeta)
 
 [LogLog-Beta and More: A New Algorithm for Cardinality Estimation Based on LogLog Counting](https://arxiv.org/pdf/1612.02284.pdf) -
 by Jason Qin, Denys Kim, Yumei Tung
