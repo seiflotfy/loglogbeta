@@ -6,9 +6,7 @@ by Jason Qin, Denys Kim, Yumei Tung
 **TL;DR:**
 Better than HyperLogLog in approximating the number unique elements in a set
 
-## Implementations
-
-### LogLog-Beta (simple version)
+## LogLog-Beta (simple version)
 
 LogLog-Beta is a new algorithm for estimating cardinalities based on LogLog counting. The new algorithm uses only one formula and needs no additional bias corrections for the entire range of cardinalities, therefore, it is more efficient and simpler to implement. Our simulations show that the accuracy provided by the new algorithm is as good as or better than the accuracy provided by either of HyperLogLog or HyperLogLog++. In addition to LogLog-Beta we also provide another one-formula estimator for cardinalities based on order statistics, a modification of an algorithm developed by Lumbroso.
 
@@ -25,7 +23,7 @@ llb.Add([]byte("hello"))
 llb.Cardinality()
 ```
 
-### Retaining-LogLog-Beta (basically [HLLSeries](https://static.javadoc.io/com.twitter/algebird-core_2.11/0.12.3/index.html#com.twitter.algebird.HLLSeries) with minor modifications)
+## Retaining-LogLog-Beta (basically [HLLSeries](https://static.javadoc.io/com.twitter/algebird-core_2.11/0.12.3/index.html#com.twitter.algebird.HLLSeries) with minor modifications)
 
 Retaining-LogLog-Beta can produce a LogLog-Beta counter for any window into the past, using a constant factor more space (8 * (32-precisionBits)) than LogLog-Beta.
 
