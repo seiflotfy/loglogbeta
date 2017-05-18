@@ -60,7 +60,7 @@ func TestMerge(t *testing.T) {
 
 	unique := map[string]bool{}
 
-	for i := 1; i <= 100000; i++ {
+	for i := 1; i <= 3500000; i++ {
 		str := RandStringBytesMaskImprSrc(rand.Uint32() % 32)
 		llb1.Add([]byte(str))
 		unique[str] = true

@@ -3,6 +3,8 @@ package loglogbeta
 import (
 	"math"
 	"time"
+
+	metro "github.com/dgryski/go-metro"
 )
 
 func zeros(registers []uint8) float64 {
@@ -87,4 +89,12 @@ func regSumSince(registers [][]int64, since time.Time) float64 {
 		sum += 1.0 / math.Pow(2.0, float64(maxI))
 	}
 	return sum
+}
+
+func getPosVal(value []byte, precision uint8) (uint64, uint8) {
+	x := metro.Hash64(value, 1337)
+	max := 64 - precision
+	val := rho(x<<(precision), max)
+	k := x >> uint(max)
+	return k, val
 }

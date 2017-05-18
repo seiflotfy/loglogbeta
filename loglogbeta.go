@@ -1,10 +1,6 @@
 package loglogbeta
 
-import (
-	"errors"
-
-	metro "github.com/dgryski/go-metro"
-)
+import "errors"
 
 // LogLogBeta is a sketch for cardinality estimation based on LogLog counting
 type LogLogBeta struct {
@@ -36,10 +32,7 @@ func NewDefault(precision uint8) (*LogLogBeta, error) {
 
 // Add inserts a value into the sketch
 func (llb *LogLogBeta) Add(value []byte) {
-	x := metro.Hash64(value, 1337)
-	max := 32 - llb.precision
-	val := rho(x<<(llb.precision+32), max)
-	k := x >> uint(max+32)
+	k, val := getPosVal(value, llb.precision)
 	if llb.registers[k] < val {
 		llb.registers[k] = val
 	}

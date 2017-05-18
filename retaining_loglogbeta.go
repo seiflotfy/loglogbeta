@@ -3,8 +3,6 @@ package loglogbeta
 import (
 	"errors"
 	"time"
-
-	metro "github.com/dgryski/go-metro"
 )
 
 // RLogLogBeta is a sketch for retaining cardinality estimation based on LogLog counting
@@ -23,7 +21,7 @@ func NewRetaining(precision uint8) (*RLogLogBeta, error) {
 	}
 
 	m := uint32(1 << precision)
-	max := 32 - precision
+	max := 64 - precision
 	registers := make([][]int64, m, m)
 	for i := range registers {
 		registers[i] = make([]int64, max, max)
@@ -50,10 +48,8 @@ func (rllb *RLogLogBeta) AddNow(value []byte) {
 // Add inserts a value into the sketch with given timestamp
 func (rllb *RLogLogBeta) Add(value []byte, timestamp time.Time) {
 	now := timestamp.Unix()
-	x := metro.Hash64(value, 1337)
-	max := 32 - rllb.precision
-	val := rho(x<<(rllb.precision+32), max) - 1
-	k := x >> uint(max+32)
+	k, val := getPosVal(value, rllb.precision)
+	val--
 
 	if rllb.registers[k][val] <= now {
 		rllb.registers[k][val] = now
