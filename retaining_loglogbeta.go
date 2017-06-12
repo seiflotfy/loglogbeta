@@ -36,8 +36,9 @@ func NewRetaining(precision uint8) (*RLogLogBeta, error) {
 }
 
 // NewDefaultRetaining returns a RLogLogBeta sketch with 2^14 registers
-func NewDefaultRetaining(precision uint8) (*RLogLogBeta, error) {
-	return NewRetaining(14)
+func NewDefaultRetaining() *RLogLogBeta {
+	rllb, _ := NewRetaining(14)
+	return rllb
 }
 
 // AddNow inserts a value into the sketch with the current timestamp

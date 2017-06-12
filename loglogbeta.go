@@ -26,8 +26,9 @@ func New(precision uint8) (*LogLogBeta, error) {
 }
 
 // NewDefault returns a LogLogBeta sketch with 2^14 registers
-func NewDefault(precision uint8) (*LogLogBeta, error) {
-	return New(14)
+func NewDefault() *LogLogBeta {
+	llb, _ := New(14)
+	return llb
 }
 
 // Add inserts a value into the sketch
