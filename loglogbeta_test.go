@@ -11,6 +11,17 @@ const letterBytes = "abcdefghijklmnopqrstuvwxyzABCDEFGHIJKLMNOPQRSTUVWXYZ"
 
 var src = rand.NewSource(time.Now().UnixNano())
 
+func TestZeros(t *testing.T) {
+	registers := []uint8{
+		0, 1, 0, 5, 6, 7, 0, 9, 10, 11,
+	}
+	got := zeros(registers)
+	exp := 3.0
+	if got != exp {
+		t.Errorf("expected %.2f, got %.2f", exp, got)
+	}
+}
+
 func RandStringBytesMaskImprSrc(n uint32) string {
 	b := make([]byte, n)
 	for i := uint32(0); i < n; i++ {
@@ -95,5 +106,4 @@ func TestMerge(t *testing.T) {
 	if float64(res) < float64(exact)-(float64(exact)*expectedError) || float64(res) > float64(exact)+(float64(exact)*expectedError) {
 		t.Errorf("Exact %d, got %d which is %.2f%% error", exact, res, ratio)
 	}
-
 }

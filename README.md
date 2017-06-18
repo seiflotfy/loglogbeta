@@ -8,7 +8,7 @@ Better than HyperLogLog in approximating the number unique elements in a set
 
 ## LogLog-Beta
 
-LogLog-Beta is a new algorithm for estimating cardinalities based on LogLog counting. The new algorithm uses only one formula and needs no additional bias corrections for the entire range of cardinalities, therefore, it is more efficient and simpler to implement. Our simulations show that the accuracy provided by the new algorithm is as good as or better than the accuracy provided by either of HyperLogLog or HyperLogLog++. In addition to LogLog-Beta we also provide another one-formula estimator for cardinalities based on order statistics, a modification of an algorithm developed by Lumbroso.
+LogLog-Beta is a new algorithm for estimating cardinalities based on LogLog counting. The new algorithm uses only one formula and needs no additional bias corrections for the entire range of cardinalities, therefore, it is more efficient and simpler to implement. The simulations show that the accuracy provided by the new algorithm is as good as or better than the accuracy provided by either of HyperLogLog or HyperLogLog++.
 
 #### Using LogLog-Beta
 
