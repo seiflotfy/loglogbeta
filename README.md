@@ -1,4 +1,4 @@
-# (Retaining) LogLog-Beta [![GoDoc](https://godoc.org/github.com/seiflotfy/loglogbeta?status.svg)](https://godoc.org/github.com/seiflotfy/loglogbeta)
+# LogLog-Beta [![GoDoc](https://godoc.org/github.com/seiflotfy/loglogbeta?status.svg)](https://godoc.org/github.com/seiflotfy/loglogbeta)
 
 [LogLog-Beta and More: A New Algorithm for Cardinality Estimation Based on LogLog Counting](https://arxiv.org/pdf/1612.02284.pdf) -
 by Jason Qin, Denys Kim, Yumei Tung
@@ -6,7 +6,7 @@ by Jason Qin, Denys Kim, Yumei Tung
 **TL;DR:**
 Better than HyperLogLog in approximating the number unique elements in a set
 
-## LogLog-Beta (simple version)
+## LogLog-Beta
 
 LogLog-Beta is a new algorithm for estimating cardinalities based on LogLog counting. The new algorithm uses only one formula and needs no additional bias corrections for the entire range of cardinalities, therefore, it is more efficient and simpler to implement. Our simulations show that the accuracy provided by the new algorithm is as good as or better than the accuracy provided by either of HyperLogLog or HyperLogLog++. In addition to LogLog-Beta we also provide another one-formula estimator for cardinalities based on order statistics, a modification of an algorithm developed by Lumbroso.
 
@@ -22,34 +22,6 @@ llb.Add([]byte("hello"))
 // Returns cardinality
 llb.Cardinality()
 ```
-
-## Retaining-LogLog-Beta (basically [HLLSeries](https://static.javadoc.io/com.twitter/algebird-core_2.11/0.12.3/index.html#com.twitter.algebird.HLLSeries) with minor modifications)
-
-Retaining-LogLog-Beta can produce a LogLog-Beta counter for any window into the past, using a constant factor more space (8 * (32-precisionBits)) than LogLog-Beta.
-
-For each register, it keeps the maxTimestamp for each rho value it has seen. This implies an array of length "32-precisionBits" with 64 bit timestamp values per register.
-This allows it to reconstruct an LogLog-Beta as it would be had it started at zero at any given point in the past, and seen the same updates this structure has seen.
-
-#### Using Retaining-LogLog-Beta
-
-```go
-// Create RLogLogBeta
-rllb := loglogbeta.NewRetainingDefault()
-
-// Add value to RLogLogBeta with the current timestamp
-rllb.AddNow([]byte("hello"))
-
-// Add value to RLogLogBeta with a given timestamp
-pastTime := time.Date(2009, time.November, 10, 23, 0, 0, 0, time.UTC)
-rllb.Add([]byte["world"], pastTime)
-
-// Returns cardinality since timestamp
-rllb.CardinalitySince(pastTime)
-
-// Returns overall cardinality
-rllb.Cardinality()
-```
-
 
 ## Initial Results
 
