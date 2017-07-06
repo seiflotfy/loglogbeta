@@ -6,9 +6,9 @@ import (
 	"os"
 	"path/filepath"
 
-	"log"
+	"github.com/seiflotfy/loglogbeta"
 
-	"github.com/seiflotfy/loglog-beta"
+	"log"
 )
 
 func main() {
@@ -19,11 +19,7 @@ func main() {
 	}
 
 	totalUnique := map[string]bool{}
-	totalHBB, err := loglogbeta.New(16)
-	if err != nil {
-		log.Fatalln(err)
-		return
-	}
+	tllb := loglogbeta.New()
 
 	for _, f := range files {
 		f, err := os.Open(f)
@@ -34,7 +30,7 @@ func main() {
 		reader := bufio.NewReader(f)
 		unique := map[string]bool{}
 
-		hbb, err := loglogbeta.New(16)
+		llb := loglogbeta.New()
 
 		for {
 			text, _, err := reader.ReadLine()
@@ -43,16 +39,16 @@ func main() {
 			}
 			unique[string(text)] = true
 			totalUnique[string(text)] = true
-			hbb.Add([]byte(text))
-			totalHBB.Add([]byte(text))
+			llb.Add([]byte(text))
+			tllb.Add([]byte(text))
 		}
 
-		est := hbb.Cardinality()
+		est := llb.Cardinality()
 		ratio := fmt.Sprintf("%2f%%", 100*(1-float64(len(unique))/float64(est)))
 		log.Println("\n\tfile: ", f.Name(), "\n\texact:", len(unique), "\n\testimate:", est, "\n\tratio:", ratio)
 	}
 
-	est := totalHBB.Cardinality()
+	est := tllb.Cardinality()
 	ratio := fmt.Sprintf("%2f%%", 100*(1-float64(len(totalUnique))/float64(est)))
 	log.Println("\n\ttotal\n\texact:", len(totalUnique), "\n\testimate:", est, "\n\tratio:", ratio)
 }
