@@ -7,7 +7,13 @@ import (
 	metro "github.com/dgryski/go-metro"
 )
 
-func zeros(registers []uint8) float64 {
+const (
+	precision = 14
+	m         = uint32(1 << precision)
+	max       = 64 - precision
+)
+
+func zeros(registers [m]uint8) float64 {
 	var z float64
 	for _, val := range registers {
 		if val == 0 {
@@ -30,7 +36,7 @@ func beta(ez float64) float64 {
 }
 
 // Calculate the position of the leftmost 1-bit.
-func rho(val uint64, max uint8) (r uint8) {
+func rho(val uint64) (r uint8) {
 	for val&0x8000000000000000 == 0 && r < max-1 {
 		val <<= 1
 		r++
@@ -50,7 +56,7 @@ func alpha(m float64) float64 {
 	return 0.7213 / (1 + 1.079/m)
 }
 
-func regSum(registers []uint8) float64 {
+func regSum(registers [m]uint8) float64 {
 	sum := 0.0
 	for _, val := range registers {
 		sum += 1.0 / math.Pow(2.0, float64(val))
@@ -60,39 +66,25 @@ func regSum(registers []uint8) float64 {
 
 func getPosVal(value []byte, precision uint8) (uint64, uint8) {
 	x := metro.Hash64(value, 1337)
-	max := 64 - precision
-	val := rho(x<<(precision), max)
+	val := rho(x << precision)
 	k := x >> uint(max)
 	return k, val
 }
 
 // LogLogBeta is a sketch for cardinality estimation based on LogLog counting
 type LogLogBeta struct {
-	registers []uint8
+	registers [m]uint8
 	m         uint32
 	precision uint8
 	alpha     float64
 }
 
-// New returns a LogLogBeta sketch with 2^precision registers, where
-// precision must be between 4 and 16
-func New(precision uint8) (*LogLogBeta, error) {
-	if precision > 16 || precision < 4 {
-		return nil, errors.New("precision must be between 4 and 16")
-	}
-	m := uint32(1 << precision)
+// New returns a LogLogBeta
+func New() *LogLogBeta {
 	return &LogLogBeta{
-		m:         m,
-		precision: precision,
-		registers: make([]uint8, m),
+		registers: [m]uint8{},
 		alpha:     alpha(float64(m)),
-	}, nil
-}
-
-// NewDefault returns a LogLogBeta sketch with 2^14 registers
-func NewDefault() *LogLogBeta {
-	llb, _ := New(14)
-	return llb
+	}
 }
 
 // Add inserts a value into the sketch

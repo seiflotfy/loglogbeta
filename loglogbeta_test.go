@@ -12,11 +12,16 @@ const letterBytes = "abcdefghijklmnopqrstuvwxyzABCDEFGHIJKLMNOPQRSTUVWXYZ"
 var src = rand.NewSource(time.Now().UnixNano())
 
 func TestZeros(t *testing.T) {
-	registers := []uint8{
-		0, 1, 0, 5, 6, 7, 0, 9, 10, 11,
+	registers := [m]uint8{}
+	exp := 0.0
+	for i := range registers {
+		val := uint8(rand.Intn(32))
+		if val == 0 {
+			exp++
+		}
+		registers[i] = val
 	}
 	got := zeros(registers)
-	exp := 3.0
 	if got != exp {
 		t.Errorf("expected %.2f, got %.2f", exp, got)
 	}
@@ -31,11 +36,7 @@ func RandStringBytesMaskImprSrc(n uint32) string {
 }
 
 func TestCardinality(t *testing.T) {
-	llb, err := New(14)
-	if err != nil {
-		t.Error("expected no error, got", err)
-	}
-
+	llb := New()
 	step := 10000
 	unique := map[string]bool{}
 
@@ -60,14 +61,8 @@ func TestCardinality(t *testing.T) {
 }
 
 func TestMerge(t *testing.T) {
-	llb1, err := New(14)
-	if err != nil {
-		t.Error("expected no error, got", err)
-	}
-	llb2, err := New(14)
-	if err != nil {
-		t.Error("expected no error, got", err)
-	}
+	llb1 := New()
+	llb2 := New()
 
 	unique := map[string]bool{}
 
@@ -81,8 +76,7 @@ func TestMerge(t *testing.T) {
 		unique[str] = true
 	}
 
-	err = llb1.Merge(llb2)
-	if err != nil {
+	if err := llb1.Merge(llb2); err != nil {
 		t.Error("expected no error, got", err)
 	}
 
@@ -95,8 +89,7 @@ func TestMerge(t *testing.T) {
 		t.Errorf("Exact %d, got %d which is %.2f%% error", exact, res, ratio)
 	}
 
-	err = llb1.Merge(llb2)
-	if err != nil {
+	if err := llb1.Merge(llb2); err != nil {
 		t.Error("expected no error, got", err)
 	}
 
