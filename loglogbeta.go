@@ -56,12 +56,15 @@ func alpha(m float64) float64 {
 	return 0.7213 / (1 + 1.079/m)
 }
 
-func regSum(registers [m]uint8) float64 {
-	sum := 0.0
+func regSumAndZeros(registers [m]uint8) (float64, float64) {
+	sum, ez := 0.0, 0.0
 	for _, val := range registers {
+		if val == 0 {
+			ez++
+		}
 		sum += 1.0 / math.Pow(2.0, float64(val))
 	}
-	return sum
+	return sum, ez
 }
 
 func getPosVal(value []byte, precision uint8) (uint64, uint8) {
@@ -97,8 +100,7 @@ func (llb *LogLogBeta) Add(value []byte) {
 
 // Cardinality returns the number of unique elements added to the sketch
 func (llb *LogLogBeta) Cardinality() uint64 {
-	sum := regSum(llb.registers)
-	ez := zeros(llb.registers)
+	sum, ez := regSumAndZeros(llb.registers)
 	m := float64(llb.m)
 	beta := beta(ez)
 	return uint64(llb.alpha * m * (m - ez) / (beta + sum))

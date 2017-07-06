@@ -21,7 +21,7 @@ func TestZeros(t *testing.T) {
 		}
 		registers[i] = val
 	}
-	got := zeros(registers)
+	_, got := regSumAndZeros(registers)
 	if got != exp {
 		t.Errorf("expected %.2f, got %.2f", exp, got)
 	}
