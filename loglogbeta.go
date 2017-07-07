@@ -12,6 +12,7 @@ const (
 	m         = uint32(1 << precision)
 	max       = 64 - precision
 	maxX      = math.MaxUint64 >> max
+	alpha = return 0.7213 / (1 + 1.079/m)
 )
 
 func beta(ez float64) float64 {
@@ -24,18 +25,6 @@ func beta(ez float64) float64 {
 		0.03738027*math.Pow(zl, 5) +
 		-0.005384159*math.Pow(zl, 6) +
 		0.00042419*math.Pow(zl, 7)
-}
-
-func alpha(m float64) float64 {
-	switch m {
-	case 16:
-		return 0.673
-	case 32:
-		return 0.697
-	case 64:
-		return 0.709
-	}
-	return 0.7213 / (1 + 1.079/m)
 }
 
 func regSumAndZeros(registers [m]uint8) (float64, float64) {
@@ -59,14 +48,12 @@ func getPosVal(value []byte, precision uint8) (uint64, uint8) {
 // LogLogBeta is a sketch for cardinality estimation based on LogLog counting
 type LogLogBeta struct {
 	registers [m]uint8
-	alpha     float64
 }
 
 // New returns a LogLogBeta
 func New() *LogLogBeta {
 	return &LogLogBeta{
 		registers: [m]uint8{},
-		alpha:     alpha(float64(m)),
 	}
 }
 
@@ -82,7 +69,7 @@ func (llb *LogLogBeta) Add(value []byte) {
 func (llb *LogLogBeta) Cardinality() uint64 {
 	sum, ez := regSumAndZeros(llb.registers)
 	m := float64(m)
-	return uint64(llb.alpha * m * (m - ez) / (beta(ez) + sum))
+	return uint64(alpha * m * (m - ez) / (beta(ez) + sum))
 }
 
 // Merge takes another LogLogBeta and combines it with llb one, making llb the union of both.
