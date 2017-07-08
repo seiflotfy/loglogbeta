@@ -12,7 +12,7 @@ const (
 	m         = uint32(1 << precision)
 	max       = 64 - precision
 	maxX      = math.MaxUint64 >> max
-	alpha = return 0.7213 / (1 + 1.079/m)
+	alpha     = 0.7213 / (1 + 1.079/float64(m))
 )
 
 func beta(ez float64) float64 {
