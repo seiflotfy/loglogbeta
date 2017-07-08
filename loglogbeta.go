@@ -38,10 +38,9 @@ func regSumAndZeros(registers [m]uint8) (float64, float64) {
 	return sum, ez
 }
 
-func getPosVal(value []byte, precision uint8) (uint64, uint8) {
-	x := metro.Hash64(value, 1337)
-	val := uint8(bits.Clz((x<<precision)^maxX)) + 1
-	k := x >> uint(max)
+func getPosVal(hash uint64) (uint64, uint8) {
+	val := uint8(bits.Clz((hash<<precision)^maxX)) + 1
+	k := hash >> uint(max)
 	return k, val
 }
 
@@ -59,9 +58,14 @@ func New() *LogLogBeta {
 
 // Add inserts a value into the sketch
 func (llb *LogLogBeta) Add(value []byte) {
-	k, val := getPosVal(value, precision)
-	if llb.registers[k] < val {
-		llb.registers[k] = val
+	x := metro.Hash64(value, 1337)
+	k, val := getPosVal(x)
+	llb.add(k, val)
+}
+
+func (llb *LogLogBeta) add(pos uint64, val uint8) {
+	if llb.registers[pos] < val {
+		llb.registers[pos] = val
 	}
 }
 
