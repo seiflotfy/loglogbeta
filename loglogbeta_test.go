@@ -4,12 +4,9 @@ import (
 	"math"
 	"math/rand"
 	"testing"
-	"time"
 )
 
 const letterBytes = "abcdefghijklmnopqrstuvwxyzABCDEFGHIJKLMNOPQRSTUVWXYZ"
-
-var src = rand.NewSource(time.Now().UnixNano())
 
 func estimateError(got, exp uint64) float64 {
 	var delta uint64
