@@ -49,8 +49,7 @@ func regSumAndZeros(registers [m]uint8) (float64, float64) {
 	return sum, ez
 }
 
-func getPosVal(value []byte, precision uint8) (uint64, uint8) {
-	x := metro.Hash64(value, 1337)
+func getPosVal(x uint64) (uint64, uint8) {
 	val := uint8(bits.Clz((x<<precision)^maxX)) + 1
 	k := x >> uint(max)
 	return k, val
@@ -70,12 +69,18 @@ func New() *LogLogBeta {
 	}
 }
 
-// Add inserts a value into the sketch
-func (llb *LogLogBeta) Add(value []byte) {
-	k, val := getPosVal(value, precision)
+// AddHash ...
+func (llb *LogLogBeta) AddHash(x uint64) {
+	k, val := getPosVal(x)
 	if llb.registers[k] < val {
 		llb.registers[k] = val
 	}
+}
+
+// Add inserts a value into the sketch
+func (llb *LogLogBeta) Add(value []byte) {
+	x := metro.Hash64(value, 1337)
+	llb.AddHash(x)
 }
 
 // Cardinality returns the number of unique elements added to the sketch

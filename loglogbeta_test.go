@@ -18,7 +18,6 @@ func estimateError(got, exp uint64) float64 {
 	return float64(delta) / float64(exp)
 }
 
-/*
 func TestZeros(t *testing.T) {
 	registers := [m]uint8{}
 	exp := 0.0
@@ -34,7 +33,6 @@ func TestZeros(t *testing.T) {
 		t.Errorf("expected %.2f, got %.2f", exp, got)
 	}
 }
-*/
 
 func RandStringBytesMaskImprSrc(n uint32) string {
 	b := make([]byte, n)
