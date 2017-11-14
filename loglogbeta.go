@@ -39,12 +39,6 @@ func regSumAndZeros(registers []uint8) (float64, float64) {
 	return sum, ez
 }
 
-func getPosVal(x uint64) (uint64, uint8) {
-	val := uint8(bits.LeadingZeros64((x<<precision)^maxX)) + 1
-	k := x >> uint(max)
-	return k, val
-}
-
 // LogLogBeta is a sketch for cardinality estimation based on LogLog counting
 type LogLogBeta [m]uint8
 
@@ -55,7 +49,8 @@ func New() *LogLogBeta {
 
 // AddHash takes in a "hashed" value (bring your own hashing)
 func (llb *LogLogBeta) AddHash(x uint64) {
-	k, val := getPosVal(x)
+	k := x >> uint(max)
+	val := uint8(bits.LeadingZeros64((x<<precision)^maxX)) + 1
 	if llb[k] < val {
 		llb[k] = val
 	}
@@ -63,8 +58,7 @@ func (llb *LogLogBeta) AddHash(x uint64) {
 
 // Add inserts a value into the sketch
 func (llb *LogLogBeta) Add(value []byte) {
-	x := metro.Hash64(value, 1337)
-	llb.AddHash(x)
+	llb.AddHash(metro.Hash64(value, 1337))
 }
 
 // Cardinality returns the number of unique elements added to the sketch
