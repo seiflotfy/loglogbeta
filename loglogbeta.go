@@ -1,17 +1,19 @@
 package loglogbeta
 
 import (
+	"fmt"
 	"math"
+	bits "math/bits"
 
-	bits "github.com/dgryski/go-bits"
 	metro "github.com/dgryski/go-metro"
 )
 
 const (
 	precision = 14
-	m         = uint32(1 << precision)
+	m         = uint32(1 << precision) // 16384
 	max       = 64 - precision
 	maxX      = math.MaxUint64 >> max
+	alpha     = 0.7213 / (1 + 1.079/float64(m))
 )
 
 func beta(ez float64) float64 {
@@ -26,19 +28,7 @@ func beta(ez float64) float64 {
 		0.00042419*math.Pow(zl, 7)
 }
 
-func alpha(m float64) float64 {
-	switch m {
-	case 16:
-		return 0.673
-	case 32:
-		return 0.697
-	case 64:
-		return 0.709
-	}
-	return 0.7213 / (1 + 1.079/m)
-}
-
-func regSumAndZeros(registers [m]uint8) (float64, float64) {
+func regSumAndZeros(registers []uint8) (float64, float64) {
 	sum, ez := 0.0, 0.0
 	for _, val := range registers {
 		if val == 0 {
@@ -50,30 +40,24 @@ func regSumAndZeros(registers [m]uint8) (float64, float64) {
 }
 
 func getPosVal(x uint64) (uint64, uint8) {
-	val := uint8(bits.Clz((x<<precision)^maxX)) + 1
+	val := uint8(bits.LeadingZeros64((x<<precision)^maxX)) + 1
 	k := x >> uint(max)
 	return k, val
 }
 
 // LogLogBeta is a sketch for cardinality estimation based on LogLog counting
-type LogLogBeta struct {
-	registers [m]uint8
-	alpha     float64
-}
+type LogLogBeta [m]uint8
 
 // New returns a LogLogBeta
 func New() *LogLogBeta {
-	return &LogLogBeta{
-		registers: [m]uint8{},
-		alpha:     alpha(float64(m)),
-	}
+	return new(LogLogBeta)
 }
 
-// AddHash ...
+// AddHash takes in a "hashed" value (bring your own hashing)
 func (llb *LogLogBeta) AddHash(x uint64) {
 	k, val := getPosVal(x)
-	if llb.registers[k] < val {
-		llb.registers[k] = val
+	if llb[k] < val {
+		llb[k] = val
 	}
 }
 
@@ -85,16 +69,31 @@ func (llb *LogLogBeta) Add(value []byte) {
 
 // Cardinality returns the number of unique elements added to the sketch
 func (llb *LogLogBeta) Cardinality() uint64 {
-	sum, ez := regSumAndZeros(llb.registers)
+	sum, ez := regSumAndZeros(llb[:])
 	m := float64(m)
-	return uint64(llb.alpha * m * (m - ez) / (beta(ez) + sum))
+	return uint64(alpha * m * (m - ez) / (beta(ez) + sum))
 }
 
 // Merge takes another LogLogBeta and combines it with llb one, making llb the union of both.
 func (llb *LogLogBeta) Merge(other *LogLogBeta) {
-	for i, v := range llb.registers {
-		if v < other.registers[i] {
-			llb.registers[i] = other.registers[i]
+	for i, v := range llb {
+		if v < other[i] {
+			llb[i] = other[i]
 		}
 	}
+}
+
+// Marshal returns a byte slice representation
+func (llb *LogLogBeta) Marshal() []byte {
+	return llb[:]
+}
+
+// Unmarshal returns a LogLogBeta for given bytes
+func Unmarshal(bytes []byte) (*LogLogBeta, error) {
+	if uint32(len(bytes)) != m {
+		return nil, fmt.Errorf("Invalid byte slice length: expected %d, got %d", m, len(bytes))
+	}
+	llb := new(LogLogBeta)
+	copy(llb[:], bytes)
+	return llb, nil
 }

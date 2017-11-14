@@ -28,7 +28,7 @@ func TestZeros(t *testing.T) {
 		}
 		registers[i] = val
 	}
-	_, got := regSumAndZeros(registers)
+	_, got := regSumAndZeros(registers[:])
 	if got != exp {
 		t.Errorf("expected %.2f, got %.2f", exp, got)
 	}
@@ -99,5 +99,25 @@ func TestMerge(t *testing.T) {
 
 	if float64(res) < float64(exact)-(float64(exact)*expectedError) || float64(res) > float64(exact)+(float64(exact)*expectedError) {
 		t.Errorf("Exact %d, got %d which is %.2f%% error", exact, res, ratio)
+	}
+}
+
+func TestMarshal(t *testing.T) {
+	llb := New()
+	unique := map[string]bool{}
+
+	for i := 1; len(unique) <= 1000000; i++ {
+		str := RandStringBytesMaskImprSrc(rand.Uint32() % 32)
+		llb.Add([]byte(str))
+		unique[str] = true
+	}
+
+	bytes := llb.Marshal()
+	ullb, err := Unmarshal(bytes)
+	if err != nil {
+		t.Errorf("Expected no error, got %v", err)
+	}
+	if *ullb != *llb {
+		t.Errorf("Expected %d,\n\n got %d", llb, ullb)
 	}
 }
